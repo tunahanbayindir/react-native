@@ -299,8 +299,17 @@ public class ReactEditText extends AppCompatEditText {
     }
 
     if (start != UNSET && end != UNSET) {
+      start = clampToTextLength(start);
+      end = clampToTextLength(end);
+
       setSelection(start, end);
     }
+  }
+  
+  private int clampToTextLength(int value) {
+    int textLength = getText() == null ? 0 : getText().length();
+
+    return Math.max(0, Math.min(value, textLength));
   }
 
   @Override
@@ -520,7 +529,10 @@ public class ReactEditText extends AppCompatEditText {
       // When we update text, we trigger onChangeText code that will
       // try to update state if the wrapper is available. Temporarily disable
       // to prevent an infinite loop.
-      getText().replace(0, length(), spannableStringBuilder);
+      Integer startPosition = getSelectionStart();
+      Integer endPosition = getSelectionEnd();
+      setText(spannableStringBuilder);
+      maybeSetSelection(mNativeEventCount, startPosition, endPosition);
     }
     mDisableTextDiffing = false;
 
